@@ -1,0 +1,24 @@
+
+
+
+
+# Jetbrains IDE Config
+.idea
+/.idea/
+.DS_Store
+
+/target/
+!.mvn/wrapper/maven-wrapper.jar
+
+
+
+
+
+### STS & Eclipse ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
