@@ -1,23 +1,23 @@
-package com.msi.model;
+package com.msi.data;
 
 
 import java.util.Date;
 
 public class EmployeeEvent {
 
-    private Employee employee;
+    private Notification employee;
     private Date date;
 
-    public EmployeeEvent(Employee employee, Date date) {
+    public EmployeeEvent(Notification employee, Date date) {
         this.employee = employee;
         this.date = date;
     }
 
-    public Employee getEmployee() {
+    public Notification getEmployee() {
         return employee;
     }
 
-    public void setEmployee(Employee employee) {
+    public void setEmployee(Notification employee) {
         this.employee = employee;
     }
 
