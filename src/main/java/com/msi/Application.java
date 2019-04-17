@@ -1,43 +1,24 @@
 package com.msi;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRepositories;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.google.gson.Gson;
 import com.msi.data.Notification;
 import com.msi.data.repository.NotificationRepository;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.QueueingConsumer;
-
-import reactor.core.publisher.Mono;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration;
-import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.data.mongodb.core.CollectionOptions;
-import org.springframework.data.mongodb.core.MongoOperations;
-import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRepositories;
-
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Stream;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import com.google.gson.Gson;
-import com.mongodb.*;
-import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoCursor;
-import com.mongodb.client.MongoDatabase;
 
 @EnableReactiveMongoRepositories
 @SpringBootApplication
@@ -52,13 +33,11 @@ public class Application {
         Connection connection = factory.newConnection();
         Channel channel = connection.createChannel();
         channel.queueDeclare("my-queue", true, false, false, null);
-
         QueueingConsumer consumer = new QueueingConsumer(channel);
         channel.basicConsume("my-queue", false, consumer);
         
         while (true) {
             QueueingConsumer.Delivery delivery = consumer.nextDelivery();
-
 			if (delivery != null) {
                 try {
                     String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
@@ -68,14 +47,13 @@ public class Application {
            		    String json = ow.writeValueAsString(message);
                     Notification notification= gson.fromJson(message , Notification.class);                
                     notificationRepository.save(notification).subscribe();
-                    channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
-                  
+                    channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);                
                 } catch (Exception e) {
                     channel.basicReject(delivery.getEnvelope().getDeliveryTag(), true);
                 }
             }
         }
-
-
 	}
 }
+	
+	
